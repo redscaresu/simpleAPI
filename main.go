@@ -48,9 +48,7 @@ func GetWeather(place string) (*Info, error) {
 	return &info, nil
 }
 
-type Handler func(w http.ResponseWriter, r *http.Request) error
-
-func GetWeatherHandler(w http.ResponseWriter, r *http.Request) error {
+func GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
 
 	city := r.URL.Query().Get("city")
 	if city == "" {
@@ -64,25 +62,16 @@ func GetWeatherHandler(w http.ResponseWriter, r *http.Request) error {
 
 	jsonInfo, err := json.Marshal(info)
 	if err != nil {
-		return nil
+		http.Error(w, "error marshaling response", http.StatusInternalServerError)
+		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonInfo)
-	return nil
-}
-
-func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	err := h(w, r)
-	if err != nil {
-		w.WriteHeader(503)
-		w.Write([]byte("bad"))
-	}
 }
 
 func main() {
 	r := chi.NewRouter()
-	r.Method("GET", "/", Handler(GetWeatherHandler))
+	r.Get("/", GetWeatherHandler)
 	http.ListenAndServe(":3333", r)
-
-	GetWeather("Dallas")
 }
