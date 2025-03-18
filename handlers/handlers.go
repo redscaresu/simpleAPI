@@ -56,11 +56,13 @@ func GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
 	city := r.URL.Query().Get("city")
 	if city == "" {
 		http.Error(w, "missing param", http.StatusBadRequest)
+		return
 	}
 
 	info, err := GetWeather(city)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %d", err), http.StatusInternalServerError)
+		return
 	}
 
 	jsonInfo, err := json.Marshal(info)
