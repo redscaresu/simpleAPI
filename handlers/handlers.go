@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/go-chi/chi"
 )
 
 const (
@@ -23,6 +25,12 @@ type City struct {
 	Name    string   `json:"name"`
 	Status  []string `json:"status"`
 	Weather string   `json:"weather"`
+}
+
+func RegisterRoutes(mux *chi.Mux) {
+	mux.Route("/weather", func(r chi.Router) {
+		r.Get("/", GetWeatherHandler)
+	})
 }
 
 func GetWeather(place string) (*Info, error) {
