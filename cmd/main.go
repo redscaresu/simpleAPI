@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/redscaresu/simpleAPI/handlers"
+	"github.com/redscaresu/simpleAPI/repository"
 )
 
 func main() {
@@ -18,9 +19,12 @@ func main() {
 }
 
 func run() error {
+	repo := repository.New()
+	app := handlers.NewApplication(repo)
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	handlers.RegisterRoutes(r)
+	app.RegisterRoutes(r)
 	return http.ListenAndServe(":3000", r)
 }

@@ -7,33 +7,31 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/redscaresu/simpleAPI/handlers/models"
+	"github.com/redscaresu/simpleAPI/repository"
 )
 
 const (
 	url = "https://jsonmock.hackerrank.com"
 )
 
-type Info struct {
-	Page       int    `json:"page"`
-	PerPage    int    `json:"per_page"`
-	Total      int    `json:"total"`
-	TotalPages int    `json:"total_pages"`
-	Data       []City `json:"data"`
+func NewApplication(repo *repository.CityRepository) *application {
+	return &application{
+		repo: repo,
+	}
 }
 
-type City struct {
-	Name    string   `json:"name"`
-	Status  []string `json:"status"`
-	Weather string   `json:"weather"`
+type application struct {
+	repo *repository.CityRepository
 }
 
-func RegisterRoutes(mux *chi.Mux) {
+func (a *application) RegisterRoutes(mux *chi.Mux) {
 	mux.Route("/weather", func(r chi.Router) {
-		r.Get("/", GetWeatherHandler)
+		r.Get("/", a.GetWeatherHandler)
 	})
 }
 
-func GetWeatherClient(place string) (*Info, error) {
+func (a *application) GetWeatherClient(place string) (*models.Info, error) {
 	path := fmt.Sprintf(url+"/api/weather/search?name=%s", place)
 	resp, err := http.Get(path)
 	if err != nil {
@@ -50,7 +48,7 @@ func GetWeatherClient(place string) (*Info, error) {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var info Info
+	var info models.Info
 	err = json.Unmarshal(bodyBytes, &info)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
@@ -59,7 +57,7 @@ func GetWeatherClient(place string) (*Info, error) {
 	return &info, nil
 }
 
-func GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
 
 	city := r.URL.Query().Get("city")
 	if city == "" {
@@ -67,7 +65,7 @@ func GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info, err := GetWeatherClient(city)
+	info, err := a.GetWeatherClient(city)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %d", err), http.StatusInternalServerError)
 		return
