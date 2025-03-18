@@ -60,7 +60,7 @@ func GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
 
 	info, err := GetWeather(city)
 	if err != nil {
-		http.Error(w, "internal error", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("internal error: %d", err), http.StatusInternalServerError)
 	}
 
 	jsonInfo, err := json.Marshal(info)
