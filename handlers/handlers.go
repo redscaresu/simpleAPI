@@ -29,18 +29,23 @@ func GetWeather(place string) (*Info, error) {
 	path := fmt.Sprintf(url+"/api/weather/search?name=%s", place)
 	resp, err := http.Get(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to make request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	var info Info
 	err = json.Unmarshal(bodyBytes, &info)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
 	}
 
 	return &info, nil
