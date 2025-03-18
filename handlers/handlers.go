@@ -1,12 +1,10 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 )
 
 const (
@@ -68,10 +66,4 @@ func GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonInfo)
-}
-
-func main() {
-	r := chi.NewRouter()
-	r.Get("/", GetWeatherHandler)
-	http.ListenAndServe(":3333", r)
 }
