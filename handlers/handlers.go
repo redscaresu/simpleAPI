@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/redscaresu/simpleAPI/handlers/models"
+	"github.com/redscaresu/simpleAPI/models"
 	"github.com/redscaresu/simpleAPI/repository"
 )
 

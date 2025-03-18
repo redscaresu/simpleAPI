@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/redscaresu/simpleAPI/handlers/models"
+	"github.com/redscaresu/simpleAPI/models"
 )
 
 var notFound = errors.New("no found")
