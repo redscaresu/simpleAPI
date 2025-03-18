@@ -33,7 +33,7 @@ func RegisterRoutes(mux *chi.Mux) {
 	})
 }
 
-func GetWeather(place string) (*Info, error) {
+func GetWeatherClient(place string) (*Info, error) {
 	path := fmt.Sprintf(url+"/api/weather/search?name=%s", place)
 	resp, err := http.Get(path)
 	if err != nil {
@@ -67,7 +67,7 @@ func GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info, err := GetWeather(city)
+	info, err := GetWeatherClient(city)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %d", err), http.StatusInternalServerError)
 		return
