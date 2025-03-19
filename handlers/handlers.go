@@ -27,7 +27,8 @@ type application struct {
 
 func (a *application) RegisterRoutes(mux *chi.Mux) {
 	mux.Route("/weather", func(r chi.Router) {
-		r.Get("/", a.GetWeatherHandler)
+		r.Get("/weather", a.GetWeatherHandler)
+		r.Get("/city", a.GetCityHandler)
 	})
 }
 
@@ -83,4 +84,15 @@ func (a *application) GetWeatherHandler(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonInfo)
+}
+
+func (a *application) GetCityHandler(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+	city, err := a.repo.GetCity(name)
+	if err != nil {
+		http.Error(w, "city not found", http.StatusNotFound)
+	}
+
+	jsonCity, err := json.Marshal(city)
+	w.Write(jsonCity)
 }
