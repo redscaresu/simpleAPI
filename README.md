@@ -7,6 +7,6 @@ This is a riff on the article https://grafana.com/blog/2024/02/09/how-i-write-ht
 
 ## Endpoints
 
-`http://localhost:3000/weather/info?city=dallas`
+`http://localhost:3000/weather/info?city=Dallas`
 
-`http://localhost:3000/weather/city?name=dallas`
+`http://localhost:3000/weather/city?name=Dallas`

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/redscaresu/simpleAPI/client"
 	"github.com/redscaresu/simpleAPI/models"
 	"github.com/redscaresu/simpleAPI/repository"
 	"github.com/stretchr/testify/require"
@@ -15,8 +16,33 @@ import (
 )
 
 func TestGetWeatherCityHandler(t *testing.T) {
+
+	want := &models.Info{
+		Page:       1,
+		PerPage:    2,
+		Total:      3,
+		TotalPages: 4,
+		Data: []models.City{
+			{
+				Name:    "Malvern",
+				Status:  []string{"raining"},
+				Weather: "12 c",
+			},
+		},
+	}
+
+	bytesInfo, err := json.Marshal(want)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		w.Write([]byte(bytesInfo))
+	}))
+	defer srv.Close()
+
 	repo := repository.New()
-	app := NewApplication(repo)
+	apiClient := client.New(srv.Client(), srv.URL)
+
+	app := NewApplication(repo, apiClient)
 
 	r := chi.NewRouter()
 	app.RegisterRoutes(r)
@@ -34,12 +60,12 @@ func TestGetWeatherCityHandler(t *testing.T) {
 	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	var info models.Info
-	err = json.Unmarshal(body, &info)
+	var got models.Info
+	err = json.Unmarshal(body, &got)
 
-	assert.Equal(t, "Dallas", info.Data[0].Name)
+	assert.Equal(t, "Malvern", got.Data[0].Name)
 
-	req = httptest.NewRequest(http.MethodGet, "/weather/city?name=Dallas", nil)
+	req = httptest.NewRequest(http.MethodGet, "/weather/city?name=Malvern", nil)
 	w = httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 
@@ -55,6 +81,6 @@ func TestGetWeatherCityHandler(t *testing.T) {
 	err = json.Unmarshal(body, &city)
 	require.NoError(t, err)
 
-	assert.Equal(t, city.Name, "Dallas")
+	assert.Equal(t, "Malvern", city.Name)
 
 }
