@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/redscaresu/simpleAPI/client"
 	"github.com/redscaresu/simpleAPI/handlers"
 	"github.com/redscaresu/simpleAPI/repository"
 )
@@ -19,8 +21,15 @@ func main() {
 }
 
 func run() error {
+
+	httpClient := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
 	repo := repository.New()
-	app := handlers.NewApplication(repo)
+	client := client.New(httpClient, "https://jsonmock.hackerrank.com")
+
+	app := handlers.NewApplication(repo, client)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

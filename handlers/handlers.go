@@ -3,26 +3,23 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/redscaresu/simpleAPI/models"
+	"github.com/redscaresu/simpleAPI/client"
 	"github.com/redscaresu/simpleAPI/repository"
 )
 
-const (
-	url = "https://jsonmock.hackerrank.com"
-)
-
-func NewApplication(repo *repository.Repository) *application {
+func NewApplication(repo *repository.Repository, client *client.APIClient) *application {
 	return &application{
-		repo: repo,
+		repo:   repo,
+		client: client,
 	}
 }
 
 type application struct {
-	repo *repository.Repository
+	repo   *repository.Repository
+	client *client.APIClient
 }
 
 func (a *application) RegisterRoutes(mux *chi.Mux) {
@@ -30,32 +27,6 @@ func (a *application) RegisterRoutes(mux *chi.Mux) {
 		r.Get("/info", a.GetWeatherHandler)
 		r.Get("/city", a.GetCityHandler)
 	})
-}
-
-func (a *application) GetWeatherClient(place string) (*models.Info, error) {
-	path := fmt.Sprintf(url+"/api/weather/search?name=%s", place)
-	resp, err := http.Get(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	var info models.Info
-	err = json.Unmarshal(bodyBytes, &info)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
-	}
-
-	return &info, nil
 }
 
 func (a *application) GetWeatherHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +37,7 @@ func (a *application) GetWeatherHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	info, err := a.GetWeatherClient(city)
+	info, err := a.client.Get(fmt.Sprintf(a.client.URL+"/api/weather/search?name=%s", city))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("internal error: %d", err), http.StatusInternalServerError)
 		return
