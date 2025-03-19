@@ -15,14 +15,14 @@ const (
 	url = "https://jsonmock.hackerrank.com"
 )
 
-func NewApplication(repo *repository.CityRepository) *application {
+func NewApplication(repo *repository.Repository) *application {
 	return &application{
 		repo: repo,
 	}
 }
 
 type application struct {
-	repo *repository.CityRepository
+	repo *repository.Repository
 }
 
 func (a *application) RegisterRoutes(mux *chi.Mux) {
