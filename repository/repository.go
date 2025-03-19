@@ -26,9 +26,8 @@ func (c *CityRepository) AddCity(city *models.City) (*models.City, error) {
 }
 
 func (c *CityRepository) GetCity(uuid uuid.UUID) (*models.City, error) {
-	city, ok := c.cities[uuid]
-	if !ok {
-		return nil, notFound
+	if city, ok := c.cities[uuid]; ok {
+		return &city, nil
 	}
-	return &city, nil
+	return nil, notFound
 }

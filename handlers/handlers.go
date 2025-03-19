@@ -71,6 +71,10 @@ func (a *application) GetWeatherHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	for _, v := range info.Data {
+		a.repo.AddCity(&v)
+	}
+
 	jsonInfo, err := json.Marshal(info)
 	if err != nil {
 		http.Error(w, "error marshaling response", http.StatusInternalServerError)
