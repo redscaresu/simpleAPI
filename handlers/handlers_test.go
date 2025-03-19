@@ -14,7 +14,7 @@ import (
 	"gotest.tools/assert"
 )
 
-func TestGetWeatherHandler(t *testing.T) {
+func TestGetWeatherCityHandler(t *testing.T) {
 	repo := repository.New()
 	app := NewApplication(repo)
 
@@ -38,4 +38,23 @@ func TestGetWeatherHandler(t *testing.T) {
 	err = json.Unmarshal(body, &info)
 
 	assert.Equal(t, "Dallas", info.Data[0].Name)
+
+	req = httptest.NewRequest(http.MethodGet, "/weather/city?name=Dallas", nil)
+	w = httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	resp = w.Result()
+	defer resp.Body.Close()
+
+	assert.Equal(t, resp.StatusCode, http.StatusOK)
+
+	body, err = io.ReadAll(resp.Body)
+	require.NoError(t, err)
+
+	var city models.City
+	err = json.Unmarshal(body, &city)
+	require.NoError(t, err)
+
+	assert.Equal(t, city.Name, "Dallas")
+
 }
