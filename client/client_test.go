@@ -30,7 +30,7 @@ func TestGet(t *testing.T) {
 	infoBytes, err := json.Marshal(info)
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(infoBytes))
 	}))
 	defer srv.Close()
@@ -41,5 +41,4 @@ func TestGet(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, info.Data[0].Name, got.Data[0].Name)
-
 }
