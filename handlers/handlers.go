@@ -3,12 +3,17 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/redscaresu/simpleAPI/client"
 	"github.com/redscaresu/simpleAPI/repository"
 )
+
+type requestWeather struct {
+	Name string `json:"name"`
+}
 
 func NewApplication(repo *repository.Repository, client *client.APIClient) *application {
 	return &application{
@@ -26,6 +31,7 @@ func (a *application) RegisterRoutes(mux *chi.Mux) {
 	mux.Route("/weather", func(r chi.Router) {
 		r.Get("/info", a.GetWeatherHandler)
 		r.Get("/city", a.GetCityHandler)
+		r.Post("/postcity", a.PostCityHandler)
 	})
 }
 
@@ -69,4 +75,31 @@ func (a *application) GetCityHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonCity)
+}
+
+func (a *application) PostCityHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Body == nil {
+		http.Error(w, "no body found", http.StatusBadRequest)
+		return
+	}
+
+	bytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "unable to read body", http.StatusBadRequest)
+		return
+	}
+
+	var reqWeather requestWeather
+	err = json.Unmarshal(bytes, &reqWeather)
+
+	c, err := a.repo.GetCity(reqWeather.Name)
+	if err != nil {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	cBytes, err := json.Marshal(c)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(cBytes)
 }
